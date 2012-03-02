@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Can-Redefine-Classes: true
+Premain-Class: com.typesafe.path_hole.PathHole
+
+
+
+

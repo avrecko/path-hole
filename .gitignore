@@ -1,0 +1,77 @@
+# IntelliJ #
+############
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Eclipse #
+###########
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+.externalToolBuilders/
+*.launch
+.cproject
+.buildpath
+
+# Emacs #
+#########
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+.elc
+auto-save-list
+tramp
+.\#*
+
+# SublimeText #
+###############
+/*.sublime-project
+
+# TextMate #
+############
+*.tmproj
+*.tmproject
+tmtags
+
+# VIM #
+#######
+.*.sw[a-z]
+*.un~
+Session.vim
+
+# Maven Builds #
+################
+target/
+
+# Windows #
+###########
+Thumbs.db
+Desktop.ini
+
+# Mac OS #
+##########
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux #
+#########
+.*
+!.gitignore
+*~
+.directory
