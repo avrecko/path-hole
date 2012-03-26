@@ -1,6 +1,6 @@
 This is a Java agent that throws ClassNotFoundException for classes on the classpath but matching the path-hole agent filter.
 
-Usage java -javaagent:boot-hole.jar -Dboot_hole.filter=com.foo.Bar,com.baz.*Test
+Usage java -javaagent:path-hole.jar -Dpath_hole.filter=com.foo.Bar,com.baz.*Test
 
 The filter is a comma seperated list of fully qualified java names with optional wildcard character that matches everything
 
@@ -8,7 +8,7 @@ To build the project use maven
 
 from the root of project run
 
-mvn clean install
+mvn clean package
 
 The use as dependency of project use
 
