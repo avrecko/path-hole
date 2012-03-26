@@ -6,7 +6,7 @@
 
     <groupId>com.typesafe</groupId>
     <artifactId>path-hole-parent</artifactId>
-    <version>${version}</version>
+    <version>1.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -17,7 +17,6 @@
     <url>https://github.com/avrecko/path-hole</url>
 
     <properties>
-        <version>1.0-SNAPSHOT</version>
         <scala.version>2.9.1</scala.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
