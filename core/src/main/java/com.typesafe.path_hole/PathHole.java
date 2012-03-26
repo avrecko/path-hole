@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Alen Vre\u010Dko
+ * Copyright 2012 Typesafe Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,16 +128,6 @@ public class PathHole {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
         clClassNode.accept(cw);
         return cw.toByteArray();
-    }
-
-    public static FieldNode getField(ClassNode classNode, String fieldName) {
-        for (Object field : classNode.fields) {
-            FieldNode next = (FieldNode) field;
-            if (next.name.equals(fieldName)) {
-                return next;
-            }
-        }
-        return null;
     }
 
     public static Object[] getMethodNode(Class<?> clazz, String methodName, String methodDescription) {

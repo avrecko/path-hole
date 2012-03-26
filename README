@@ -12,5 +12,17 @@ mvn clean install
 
 The use as dependency of project use
 
-....
+<repositories>
+    <repository>
+        <id>path-hole</id>
+        <url>https://raw.github.com/avrecko/path-hole/master/repository</url>
+    </repository>
+</repositories>
+
+<dependency>
+   <groupId>com.typesafe</groupId>
+   <artifactId>path-hole</artifactId>
+   <version>1.0</version>
+</dependency>
+
 
