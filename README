@@ -4,6 +4,10 @@ Usage java -javaagent:path-hole.jar -Dpath_hole.filter=com.foo.Bar,com.baz.*Test
 
 The filter is a comma seperated list of fully qualified java names with optional wildcard character that matches everything
 
+You can allow a type of ClassLoaders to load the classes even if the pattern matches. Use
+
+-Dboot_hole.unfiltered.cls=com.mycompany.MyClassLoader,com.mycompany.MyClassLoader2
+
 To build the project use maven
 
 from the root of project run

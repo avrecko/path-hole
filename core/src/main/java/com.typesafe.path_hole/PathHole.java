@@ -19,7 +19,6 @@ package com.typesafe.path_hole;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -38,13 +37,15 @@ import static com.google.common.io.Resources.toByteArray;
 /**
  * Throws {@link ClassNotFoundException} for classes on the classpath but matching the path-hole agent filter.
  * <p/>
- * <p>Usage java -javaagent:boot-hole.jar -Dboot_hole.filter=com.foo.Bar,com.baz.*Test</p>
- *
+ * <p>Usage java -javaagent:path-hole.jar -Dpath_hole.filter=com.foo.Bar,com.baz.*Test</p>
+ * <p>Optionally you can allow types of ClassLoaders to load unrestricted. Use:</p>
+ * <p>-Dboot_hole.unfiltered.cls=mycompany.MyClassLoader, mycompany.MyClassLoader2</p>
  * @author Alen Vre\u010Dko
  */
 public class PathHole {
 
     public static final String FILTER_PROPERTY_NAME = "boot_hole.filter";
+    public static final String UNFILTERED_CLASSLOADER_FQNS = "boot_hole.unfiltered.cls";
 
 
     public static void premain(String agentArguments, Instrumentation instrumentation) {
@@ -66,38 +67,52 @@ public class PathHole {
 
     // we will get this method's bytecode and prepend it to the bytecode of java.lang.ClassLoader#loadClass(String,Bool)
     public void bytecodeToPrepend(String name, boolean resolve) throws ClassNotFoundException {
-        // might not seem optimal to read properties each time but this allows for riches runtime behavior
-        String filter = System.getProperty(PathHole.FILTER_PROPERTY_NAME, "").trim();
+        // if we are a unfiltered classloader let us trough
+        // note: the only allowed return is at the end of this method due to the fact this method is prepended to j.l.CL
+        String unfilteredClassLoaders = System.getProperty(PathHole.UNFILTERED_CLASSLOADER_FQNS, "").trim().replace("\\s","");
 
-        if (!filter.isEmpty() && !name.startsWith("java.") && !name.startsWith("javax.") && !name.startsWith("com.sun.") && !name.startsWith("sun.")) {
-            List<Pattern> patterns = new ArrayList<Pattern>();
+        boolean isUnfilteredClassLoader = false;
 
-            // we will parse the entries each time as we cannot cache this easily
-            // a Cache field cannot be added due to the limitations of the redefine mechanism
-            // we cannot reference non bootclasspath entries (rt.jar) as this is one level lower as the application CL
+        if (!unfilteredClassLoaders.isEmpty()) {
+            String thisFqn = this.getClass().getName();
+            for (String unfilteredClFqn : unfilteredClassLoaders.split(",")) {
+                if (thisFqn.equals(unfilteredClFqn.trim())) {
+                    isUnfilteredClassLoader = true;
+                    break;
+                }
+            }
+        }
 
-            // premature optimization is the root of all evil. As long as this will work fast enough will leave as is.
-            Pattern FQN_PATTERN = Pattern.compile("([\\p{L}_$\\*][\\p{L}\\p{N}_$\\*]*\\.)*[\\p{L}_$\\*][\\p{L}\\p{N}_$\\*]*");
+        if (!isUnfilteredClassLoader) {
+            // might not seem optimal to read properties each time but this allows for riches runtime behavior
+            String filter = System.getProperty(PathHole.FILTER_PROPERTY_NAME, "").trim();
+            if (!filter.isEmpty() && !name.startsWith("java.") && !name.startsWith("javax.") && !name.startsWith("com.sun.") && !name.startsWith("sun.")) {
+                List<Pattern> patterns = new ArrayList<Pattern>();
 
-            String[] split = filter.split(",");
-            for (String s : split) {
-                if (s != null && s.trim().length() > 0) {
-                    if (FQN_PATTERN.matcher(s.trim()).matches()) {
-                        patterns.add(Pattern.compile(s.trim().replace(".", "\\.").replace("*", ".+").replace("$","\\$")));
-                    } else {
-                        Logger.getGlobal().log(Level.WARNING, "Path Hole Agent has malformed filter entry = " + s);
+                // we will parse the entries each time as we cannot cache this easily
+                // a Cache field cannot be added due to the limitations of the redefine mechanism
+                // we cannot reference non bootclasspath entries (rt.jar) as this is one level lower as the application CL
+
+                // premature optimization is the root of all evil. As long as this will work fast enough will leave as is.
+                Pattern FQN_PATTERN = Pattern.compile("([\\p{L}_$\\*][\\p{L}\\p{N}_$\\*]*\\.)*[\\p{L}_$\\*][\\p{L}\\p{N}_$\\*]*");
+
+                String[] split = filter.split(",");
+                for (String s : split) {
+                    if (s != null && s.trim().length() > 0) {
+                        if (FQN_PATTERN.matcher(s.trim()).matches()) {
+                            patterns.add(Pattern.compile(s.trim().replace(".", "\\.").replace("*", ".+").replace("$", "\\$")));
+                        } else {
+                            Logger.getGlobal().log(Level.WARNING, "Path Hole Agent has malformed filter entry = " + s);
+                        }
+                    }
+                }
+
+                for (Pattern pattern : patterns) {
+                    if (pattern.matcher(name).matches()) {
+                        throw new ClassNotFoundException(name.replace(".", "/"));
                     }
                 }
             }
-
-            for (Pattern pattern : patterns) {
-                if (pattern.matcher(name).matches()) {
-                    throw new ClassNotFoundException(name.replace(".", "/"));
-                }
-
-            }
-
-
         }
     }
 
@@ -120,9 +135,9 @@ public class PathHole {
         InsnList baseInst = ((MethodNode) jlClassLoader[1]).instructions;
         baseInst.insertBefore(baseInst.getFirst(), prependInst);
 
-        // we just need to add any fields referenced by the prepended bytecode to the jlClassLoader
         ClassNode clClassNode = (ClassNode) jlClassLoader[0];
-        ClassNode prependClassNode = (ClassNode) ourEnhancementsToLoadClass[0];
+//        we just need to add any fields referenced by the prepended bytecode to the jlClassLoader
+//        ClassNode prependClassNode = (ClassNode) ourEnhancementsToLoadClass[0];
 
         // write the new bytecode
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);

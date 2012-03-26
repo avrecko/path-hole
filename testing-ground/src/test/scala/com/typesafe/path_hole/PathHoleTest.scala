@@ -19,8 +19,11 @@ package com.typesafe.path_hole
 import org.scalatest.{BeforeAndAfter, GivenWhenThen, FeatureSpec}
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
-import java.io.ByteArrayOutputStream
 import java.util.logging.{StreamHandler, SimpleFormatter, Logger}
+import com.google.common.base.Splitter
+import java.io.{File, ByteArrayOutputStream}
+import java.net.{URLClassLoader, URL}
+import com.google.common.collect.Iterables
 
 
 /**
@@ -116,10 +119,41 @@ class PathHoleTest extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
       }
 
     }
+
+    scenario("We can specify a ClassLoader type that is allowed to load unrestricted") {
+      given("our unfiltered ClassLoader")
+
+      // our custom classloader needs to have access to the classpath since it is the ONE that will define the class
+      var loader = new URLClassLoader(getClassPath(),this.getClass.getClassLoader) {}
+
+      System.setProperty(PathHole.UNFILTERED_CLASSLOADER_FQNS, loader.getClass.getName)
+      System.setProperty(PathHole.FILTER_PROPERTY_NAME, "*Foo5")
+
+      then("class loading should work for unfiltered CL but not for the app cl")
+
+      intercept[ClassNotFoundException] {
+        Class.forName(thisPackage + ".Foo5")
+      }
+
+      expect(loader) {
+        loader.loadClass(thisPackage + ".Foo5").getClassLoader
+      }
+
+    }
   }
 
   before(System.clearProperty(PathHole.FILTER_PROPERTY_NAME))
   after(System.clearProperty(PathHole.FILTER_PROPERTY_NAME))
+  
+  // utility methods
+  def getClassPath():Array[URL] = {
+    var classpath = System.getProperty("java.class.path")
+
+    import scala.collection.JavaConversions._
+    Splitter.on(File.pathSeparator).omitEmptyStrings().trimResults().split(classpath).map(
+      entry => "file://" + entry + (if (!entry.endsWith(".jar")) "/" else "")
+    ).map(entry => new URL(entry)).toArray[URL]
+  }
 }
 
 ///////////////////////////////////////////////////
@@ -150,3 +184,5 @@ class Foo3 {}
 class Bar3 {}
 
 case object Foo4
+
+class Foo5 {}
