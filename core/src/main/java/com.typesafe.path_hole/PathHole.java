@@ -39,18 +39,18 @@ import static com.google.common.io.Resources.toByteArray;
  * <p/>
  * <p>Usage java -javaagent:path-hole.jar -Dpath_hole.filter=com.foo.Bar,com.baz.*Test</p>
  * <p>Optionally you can allow types of ClassLoaders to load unrestricted. Use:</p>
- * <p>-Dboot_hole.unfiltered.cls=mycompany.MyClassLoader, mycompany.MyClassLoader2</p>
+ * <p>-Dpath_hole.unfiltered.cls=mycompany.MyClassLoader, mycompany.MyClassLoader2</p>
  * @author Alen Vre\u010Dko
  */
 public class PathHole {
 
-    public static final String FILTER_PROPERTY_NAME = "boot_hole.filter";
-    public static final String UNFILTERED_CLASSLOADER_FQNS = "boot_hole.unfiltered.cls";
+    public static final String FILTER_PROPERTY_NAME = "path_hole.filter";
+    public static final String UNFILTERED_CLASSLOADER_FQNS = "path_hole.unfiltered.cls";
 
 
     public static void premain(String agentArguments, Instrumentation instrumentation) {
         // check if we can redefine the java.lang.ClassLoader
-        checkArgument(instrumentation.isRedefineClassesSupported(), "Class redefinition not supported on this JVM. Remove the boot-hole agent.");
+        checkArgument(instrumentation.isRedefineClassesSupported(), "Class redefinition not supported on this JVM. Remove the path-hole agent.");
 
         // lets prepend the loadClass method with our filter
         byte[] enhancedBytes = prependToClassLoader();

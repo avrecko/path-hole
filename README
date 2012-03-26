@@ -6,7 +6,7 @@ The filter is a comma seperated list of fully qualified java names with optional
 
 You can allow a type of ClassLoaders to load the classes even if the pattern matches. Use
 
--Dboot_hole.unfiltered.cls=com.mycompany.MyClassLoader,com.mycompany.MyClassLoader2
+-Dpath_hole.unfiltered.cls=com.mycompany.MyClassLoader,com.mycompany.MyClassLoader2
 
 To build the project use maven
 

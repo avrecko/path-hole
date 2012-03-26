@@ -39,7 +39,7 @@ class PathHoleTest extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
     info("I want to be able to see classes as normal")
     info("but classes that match the path-hole agent filter should be unavailable")
     info("by unavailable I mean ClassNotFoundException should be thrown")
-    info("the filter is defined by using System property -Dboot_hole.filter=...")
+    info("the filter is defined by using System property -Dpath_hole.filter=...")
 
     val thisPackage = this.getClass.getPackage.getName
 
