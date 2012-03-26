@@ -105,6 +105,17 @@ class PathHoleTest extends FeatureSpec with GivenWhenThen with BeforeAndAfter {
         logger.removeHandler(handler);
       }
     }
+
+    scenario("case objects with $ should work as expected") {
+      given("a filter that includes $ in name")
+      System.setProperty(PathHole.FILTER_PROPERTY_NAME, "*Foo4$")
+      then("should work")
+
+      intercept[ClassNotFoundException] {
+        Class.forName(thisPackage + ".Foo4$")
+      }
+
+    }
   }
 
   before(System.clearProperty(PathHole.FILTER_PROPERTY_NAME))
@@ -137,3 +148,5 @@ class Baz2 {}
 class Foo3 {}
 
 class Bar3 {}
+
+case object Foo4

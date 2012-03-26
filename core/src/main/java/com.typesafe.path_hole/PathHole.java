@@ -83,7 +83,7 @@ public class PathHole {
             for (String s : split) {
                 if (s != null && s.trim().length() > 0) {
                     if (FQN_PATTERN.matcher(s.trim()).matches()) {
-                        patterns.add(Pattern.compile(s.trim().replace(".", "\\.").replace("*", ".+")));
+                        patterns.add(Pattern.compile(s.trim().replace(".", "\\.").replace("*", ".+").replace("$","\\$")));
                     } else {
                         Logger.getGlobal().log(Level.WARNING, "Path Hole Agent has malformed filter entry = " + s);
                     }
